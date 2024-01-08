@@ -34,6 +34,8 @@ import android.media.Image
 import android.util.Pair
 import android.widget.Button
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
@@ -72,6 +74,8 @@ import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.FileInputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 import java.nio.channels.FileChannel
 import java.nio.MappedByteBuffer
@@ -88,39 +92,37 @@ class MainActivity : AppCompatActivity() {
     var camera_switch: Button? = null
     var recognize: Button? = null
     var graphicOverlay: GraphicOverlay? = null
-    var preview_info: TextView? = null
     var isRecognizing = false
     lateinit var encodings: Array<FloatArray>
+    private val savedRegistered = HashMap<String, Recognition>() //saved Faces for recognition
+    private val savedFaces = HashMap<String, Bitmap?>() //saved Faces from detected faces
     var scaled: Bitmap? = null
     var showDetected = false
-    var selected_cam = CameraSelector.LENS_FACING_BACK //Default Back Camera
-    var recognition_name: TextView? = null
+    var selected_cam = CameraSelector.LENS_FACING_BACK
     var preview_the_face: ImageView? = null
     var distance = 1.0f //Threshold distance between 2 faces
     var tenserfLite: Interpreter? = null
-    var tf_model = "mobile_face_net.tflite" //model name
+    private val handler = Handler(Looper.getMainLooper())
     var meniu: Button? = null
     var faceDetector: FaceDetector? = null
     var switchCamera = false
     var cameraProvider: ProcessCameraProvider? = null
     var face_adder: ImageButton? = null
+    var isButtonPressed = true;
     private val scaledLock = Any()
-    private val savedRegistered = HashMap<String, Recognition>() //saved Faces for recognition
-    private val savedFaces = HashMap<String, Bitmap?>() //saved Faces from detected faces
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         preview_the_face = findViewById(R.id.imageView)
-        recognition_name = findViewById(R.id.textView)
-        preview_info = findViewById(R.id.textView2)
         face_adder = findViewById(R.id.imageButton)
         face_adder!!.visibility = View.INVISIBLE
         preview_the_face!!.visibility = View.INVISIBLE
-        recognize = findViewById(R.id.button3)
-        camera_switch = findViewById(R.id.button5)
-        meniu = findViewById(R.id.button)
+        recognize = findViewById(R.id.detect_recognize)
+        camera_switch = findViewById(R.id.switchCam)
+        meniu = findViewById(R.id.meniu)
         graphicOverlay = findViewById(R.id.graphic_overlay)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != 0) {
@@ -158,27 +160,23 @@ class MainActivity : AppCompatActivity() {
                 showDetected = false
                 recognize?.text = "Detect Face"
                 face_adder?.visibility = View.INVISIBLE
-                recognition_name?.visibility = View.VISIBLE
                 preview_the_face?.visibility = View.INVISIBLE
-                preview_info?.text = ""
             } else {
                 isRecognizing = false
                 showDetected = true
                 recognize?.text = "Recognize"
                 face_adder?.visibility = View.VISIBLE
-                recognition_name?.visibility = View.INVISIBLE
                 preview_the_face?.visibility = View.VISIBLE
-                preview_info?.text = "No face detected yet.\n"
             }
         }
 
         camera_switch?.setOnClickListener { v: View? ->
             if (selected_cam == CameraSelector.LENS_FACING_BACK) {
-                selected_cam = CameraSelector.LENS_FACING_FRONT
                 switchCamera = true
+                selected_cam = CameraSelector.LENS_FACING_FRONT
             } else {
-                selected_cam = CameraSelector.LENS_FACING_BACK
                 switchCamera = false
+                selected_cam = CameraSelector.LENS_FACING_BACK
             }
             cameraProvider?.unbindAll()
             initializeCamera()
@@ -256,11 +254,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun LoadModel() {
-            tenserfLite = Interpreter(loadModelFile(this@MainActivity, tf_model))
-            val detector_options = FaceDetectorOptions.Builder()
-                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-                    .build()
-        faceDetector = FaceDetection.getClient(detector_options)
+            tenserfLite = loadTFLiteModel(this@MainActivity, "mobile_face_net.tflite")
+            val detector_options=configureFaceDetectorOptions()
+        faceDetector = createFaceDetectionClient(detector_options)
+    }
+    private fun loadTFLiteModel(activity: Activity, modelFileName: String): Interpreter {
+        val assetManager = activity.assets
+
+        assetManager.open(modelFileName).use { inputStream ->
+            val byteBuffer = inputStream.readBytes().toByteBuffer()
+            return Interpreter(byteBuffer)
+        }
+    }
+
+    private fun ByteArray.toByteBuffer(): MappedByteBuffer {
+        val byteBuffer = ByteBuffer.allocateDirect(size)
+        byteBuffer.order(ByteOrder.nativeOrder())
+        byteBuffer.put(this)
+        byteBuffer.flip()
+        return byteBuffer as MappedByteBuffer
+    }
+    private fun createFaceDetectionClient(options: FaceDetectorOptions): FaceDetector {
+        return FaceDetection.getClient(options)
+    }
+    private fun configureFaceDetectorOptions(): FaceDetectorOptions {
+        return FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .build()
     }
 
     override fun onRequestPermissionsResult(rqCode: Int, authorization: Array<String>, results: IntArray) {
@@ -278,28 +298,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isPermissionGranted(grantResults: IntArray): Boolean {
-        return grantResults.size > 0 && grantResults[0] == 0 // permisiune acceptata
+    private fun isPermissionGranted(results: IntArray): Boolean {
+        return results.size > 0 && results[0] == 0 // permisiune acceptata
     }
 
-    @Throws(IOException::class)
-    private fun loadModelFile(currentActivity: Activity, modelFileName: String): MappedByteBuffer {
-        val modelFileDescriptor = currentActivity.assets.openFd(modelFileName)
-        FileInputStream(modelFileDescriptor.fileDescriptor).use { fileInputStream ->
-            fileInputStream.channel.use { fileChannel ->
-                val startOffset = modelFileDescriptor.startOffset
-                val declaredLength = modelFileDescriptor.declaredLength
-                return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-            }
-        }
-    }
+
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private fun initializeCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cam_preview = findViewById(R.id.previewView)
+        cam_preview = findViewById(R.id.cam_realtime)
         cameraProviderFuture.addListener({
             try {
                 val cameraProviderInstance = cameraProviderFuture.get()
@@ -347,13 +357,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun processImageAnalysis(imageProxy: ImageProxy) {
-        try {
-            Thread.sleep(0)
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
-        val inputImage = getInputImageFromProxy(imageProxy)
-        inputImage?.let { processFaceDetection(it, imageProxy) }
+        handler.postDelayed({
+            val inputImage = getInputImageFromProxy(imageProxy)
+            inputImage?.let { processFaceDetection(it, imageProxy) }
+        }, 0)
     }
 
     private fun processFaceDetection(inputImage: InputImage, imageProxy: ImageProxy) {
@@ -385,11 +392,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleNoFacesDetected() {
         graphicOverlay!!.clearOverlay()
-        if (savedRegistered.isEmpty()) {
-            recognition_name!!.text = "No Face Added Yet"
-        } else {
-            recognition_name!!.text = "You added some faces, please put a saved face in the frame"
-        }
     }
 
     private fun getBitmapFromImageProxy(imageProxy: ImageProxy?): Bitmap? {
@@ -429,7 +431,7 @@ class MainActivity : AppCompatActivity() {
             val nv21Data = convertYUVToNV21(yuvImage)
             val yuvImageObj = YuvImage(nv21Data, ImageFormat.NV21, yuvImage!!.width, yuvImage.height, null)
             val outStream = ByteArrayOutputStream()
-            yuvImageObj.compressToJpeg(Rect(0, 0, yuvImageObj.width, yuvImageObj.height), 75, outStream)
+            yuvImageObj.compressToJpeg(Rect(0, 0, yuvImageObj.width, yuvImageObj.height), 100, outStream)
             val jpegData = outStream.toByteArray()
             BitmapFactory.decodeByteArray(jpegData, 0, jpegData.size)
         } catch (e: Exception) {
@@ -492,10 +494,7 @@ class MainActivity : AppCompatActivity() {
 
     ////SAVING IMAGE TO FILE ON DEVICE
     private fun saveBitmapToFile(fileName: String, bitmap: Bitmap?) {
-
         val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-
-
         val file = File(directory, "$fileName.png")
         try {
 
@@ -547,9 +546,8 @@ class MainActivity : AppCompatActivity() {
                 val confidenceStr = java.lang.Float.toString(confidenceVal)
                 if (distance_local < distance) {
                     if (isRecognizing) graphicOverlay!!.updateOverlay(boundingBox, name, confidenceStr)
-                    recognition_name!!.text = "$name \n\nConfidence: $confidenceStr"
                 } else {
-                    recognition_name!!.text = "Unknown"
+                    if (isRecognizing) graphicOverlay!!.updateOverlay(boundingBox, "Unknown", "0")
                 }
             }
         }

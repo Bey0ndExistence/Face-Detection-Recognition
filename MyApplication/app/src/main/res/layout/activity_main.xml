@@ -19,7 +19,7 @@
         app:layout_constraintVertical_bias="0.060000002">
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/meniu"
             android:layout_width="67dp"
             android:layout_height="69dp"
             android:contentDescription="Switch Camera"
@@ -27,7 +27,7 @@
             tools:ignore="MissingConstraints" />
 
         <Button
-            android:id="@+id/button5"
+            android:id="@+id/switchCam"
             android:layout_width="67dp"
             android:layout_height="69dp"
             android:layout_marginStart="275dp"
@@ -45,7 +45,7 @@
             tools:visibility="visible" />
 
         <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
+            android:id="@+id/cam_realtime"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -70,19 +70,6 @@
 
     </RelativeLayout>
 
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="164dp"
-        android:layout_height="180dp"
-        android:textColor="@color/black"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintHorizontal_bias="0.487"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.95" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -122,24 +109,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintStart_toStartOf="@+id/imageView" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="164dp"
-        android:layout_height="wrap_content"
-        android:hint="No Face Added Yet"
-        android:textAlignment="center"
-        android:textColor="@color/purple_700"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintHorizontal_bias="0.487"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.479" />
-
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/detect_recognize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
@@ -147,7 +118,7 @@
         android:rotation="0"
         android:rotationX="0"
         android:rotationY="0"
-        android:text="Detect Face"
+        android:text="Detect"
         android:textAlignment="center"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/imageView"

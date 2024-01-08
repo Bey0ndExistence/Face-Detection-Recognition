@@ -22,49 +22,45 @@ class GraphicOverlay : View {
         this.boundingBox = boundingBox
         this.recognizedName = recognizedName
         this.confidence = confidence
-        postInvalidate() // Trigger redraw
+        postInvalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (boundingBox != null) {
-            // Draw a border around the detected face
+
             val paint = Paint()
             paint.color = Color.RED
             paint.style = Paint.Style.STROKE
             paint.strokeWidth = 5.0f
             canvas.drawRect(boundingBox!!, paint)
 
-            // Draw the recognized face's name and confidence level above the box
             if (recognizedName != null && !recognizedName!!.isEmpty()) {
                 paint.color = Color.WHITE
                 paint.style = Paint.Style.FILL
                 paint.textSize = 60.0f
 
-                // Draw recognized name
                 val textWidthName = paint.measureText(recognizedName)
                 val xName = boundingBox!!.centerX() - textWidthName / 2
                 val yName = boundingBox!!.top - 10 // Adjust the distance above the box
                 canvas.drawText(recognizedName!!, xName, yName, paint)
 
-                // Draw confidence level
                 if (confidence != null && !confidence!!.isEmpty()) {
-                    paint.color = Color.GREEN // Choose the color for confidence level
-                    paint.textSize = 50.0f // Choose the text size for confidence level
+                    paint.color = Color.GREEN
+                    paint.textSize = 50.0f
                     val textWidthConfidence = paint.measureText(confidence)
                     val xConfidence = boundingBox!!.centerX() - textWidthConfidence / 2
-                    val yConfidence = yName + 40 // Adjust the distance below the recognized name
+                    val yConfidence = yName + 40
                     canvas.drawText(confidence!!, xConfidence, yConfidence, paint)
                 }
             }
         }
     }
 
-    //help me do a clear overlay
     fun clearOverlay() {
         boundingBox = null
         recognizedName = null
         confidence = null
-        postInvalidate() // Trigger redraw
+        postInvalidate()
     }
 }
