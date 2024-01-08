@@ -49,7 +49,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui:2.5.1")
 
     implementation("com.airbnb.android:lottie:4.2.2")
-
+    implementation ("com.google.guava:guava:30.1-jre")
     implementation("com.google.code.gson:gson:2.8.9")
 
     implementation("androidx.camera:camera-view:1.2.0-alpha04")

@@ -26,7 +26,7 @@
         android:layout_height="58dp"
         android:backgroundTint="@color/teal_200"
         android:onClick="startDetectionButtonClick"
-        android:text="Start Face Detection"
+        android:text="Face Detection and Recognition"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
