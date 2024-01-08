@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="350dp"
+        android:layout_height="425dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.060000002">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="67dp"
+            android:layout_height="69dp"
+            android:contentDescription="Switch Camera"
+            android:background="@drawable/menu_list"
+            tools:ignore="MissingConstraints" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="67dp"
+            android:layout_height="69dp"
+            android:layout_marginStart="275dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="229dp"
+            android:background="@drawable/cam_switch"
+            android:backgroundTint="@color/teal_200"
+            android:elevation="1dp"
+            android:visibility="visible"
+            android:contentDescription="Switch Camera"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_conversion_absoluteHeight="63dp"
+            tools:layout_conversion_absoluteWidth="62dp"
+            tools:visibility="visible" />
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </androidx.camera.view.PreviewView>
+
+    </FrameLayout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".YourActivity">
+
+        <!-- Add other views as needed -->
+
+        <!-- GraphicOverlay element -->
+        <com.example.myapplication.GraphicOverlay
+            android:id="@+id/graphic_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:ignore="MissingClass" />
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="164dp"
+        android:layout_height="180dp"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.95" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="203dp"
+        android:layout_height="200dp"
+        android:background="#2C7E57C2"
+        android:elevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/container"
+        app:layout_constraintVertical_bias="0.769"
+        tools:srcCompat="@android:drawable/screen_background_light_transparent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/container">
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="58dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="168dp"
+        android:layout_marginBottom="164dp"
+        android:contentDescription="Switch Camera"
+        android:background="@drawable/add_button"
+        android:elevation="2dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/imageView" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="164dp"
+        android:layout_height="wrap_content"
+        android:hint="No Face Added Yet"
+        android:textAlignment="center"
+        android:textColor="@color/purple_700"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.479" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:backgroundTint="@color/teal_200"
+        android:rotation="0"
+        android:rotationX="0"
+        android:rotationY="0"
+        android:text="Detect Face"
+        android:textAlignment="center"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/container"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
